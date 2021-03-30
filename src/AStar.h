@@ -2,11 +2,14 @@
 #include <stdint.h>
 #include <assert.h>
 #include <math.h>
+#include <unistd.h>
 
 #include "linked_list.h"
 
 #ifndef A_STAR_H
 #define A_STAR_H
+
+//#define DEBUG_ASTAR
 
 typedef enum{
 	EMPTY,WALL,PATH,GOAL='X'
@@ -140,6 +143,33 @@ __always_inline float distance(Point a, Point b)
 	return hypot(abs((int)a.x-(int)b.x), abs((int)a.y-(int)b.y));
 }
 
+static void print_map_highlight(int** map, uint32_t width, uint32_t height, uint32_t pos_x, uint32_t pos_y)
+{
+	for(uint32_t x_idx = 0; x_idx < width; x_idx++)
+	{
+		for(uint32_t y_idx = 0; y_idx < height; y_idx++)
+		{
+			if(x_idx == pos_x && y_idx == pos_y)
+			{
+				printf("\e[1;32m█\e[0m");
+			}else if(map[x_idx][y_idx] == 'X')
+			{
+				printf("X");
+			}else if(map[x_idx][y_idx] == WALL)
+			{
+				printf("\e[1;34m█\e[0m");
+			}else if(map[x_idx][y_idx] == EMPTY)
+			{
+				printf(" ");
+			}else
+			{
+				printf("%d",map[x_idx][y_idx]);
+			}
+		}
+		printf("\n");
+	}
+}
+
 LLNode* shortest_path(int** map, int width, int height, Point start, Point end)
 {
 	assert(map[start.x][start.y] == EMPTY);
@@ -160,13 +190,16 @@ LLNode* shortest_path(int** map, int width, int height, Point start, Point end)
 		open = LL_first(open);
 		current = open->element;
 
-		/*printf("\n############################################################################\n");
+		#ifdef DEBUG_ASTAR
+		printf("\n############################################################################\n");
 		printf("\ncurrent: ");
 		print_node(current);
 		printf("\nopen: ");
 		print_node_list(open);
 		printf("\nclosed: ");
-		print_node_list(closed);*/
+		print_node_list(closed);
+		print_map_highlight(map, width, height, current->x, current->y);
+		#endif
 
 		closed = LL_append(closed, (void*)current);
 		open = LL_remove(open);
