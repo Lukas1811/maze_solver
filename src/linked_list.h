@@ -82,16 +82,22 @@ void LL_delete(LLNode* list)
 {
     // go to start of list 
     assert(list != NULL);
-    while (list->previous != NULL)
-    {
-        list = list->previous;
-    }
+    list = LL_first(list);
 
-    while (list->next != NULL)
+    while (true)
     {
+        if(list->element != NULL)
+        {
+            free(list->element);
+            free(list);
+
+        }
+        
+        if(list->next == NULL)
+        {
+            return;
+        }
         list = list->next;
-        free(list->previous->element);
-        free(list->previous);
     }
 }
 
